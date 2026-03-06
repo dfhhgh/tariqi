@@ -53,6 +53,10 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/Balloons-cuate.png
+    - assets/images/Businessmerger-pana1.png
+    - assets/images/Navigation-pana1.png
 
   fonts:
     - family: Almarai
@@ -62,10 +66,7 @@ flutter:
         - asset: assets/fonts/Almarai-Light.ttf
         - asset: assets/fonts/Almarai-Regular.ttf
 
-  assets:
-    - assets/images/Balloons-cuate.png
-    - assets/images/Businessmerger-pana1.png
-    - assets/images/Navigation-pana1.png
+
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

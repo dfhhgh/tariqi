@@ -7,7 +7,8 @@ class LightTheme {
   static ThemeData theme = ThemeData(
     textButtonTheme: TextButtonThemeData(
       style: ButtonStyle(
-        foregroundColor: WidgetStatePropertyAll(AppColorsLight.accent),
+        textStyle: WidgetStatePropertyAll(TextStyle(fontFamily: "Almarai")),
+        foregroundColor: WidgetStatePropertyAll(AppColorsLight.textPrimary),
       ),
     ),
     disabledColor: AppColorsLight.secondary.withOpacity(0.5),

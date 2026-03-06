@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class Pagewithimageandtext extends StatelessWidget {
   const Pagewithimageandtext({
@@ -13,14 +14,11 @@ class Pagewithimageandtext extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(image: AssetImage(Imagurl)),
-          ),
-        ),
+        Expanded(child: Image.asset(Imagurl)),
+
         Text(
           txt,
-          style: TextStyle(fontFamily: "Almarai-Regular"),
+          style: TextStyle(fontFamily: "Almarai-Regular", fontSize: 16.sp),
           overflow: TextOverflow.clip,
         ),
       ],
