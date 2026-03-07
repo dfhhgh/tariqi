@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/features/auth/presentation/pages/login_page.dart';
+import 'package:flutter_application_1/features/onboarding/onboarding_page.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:svg_flutter/svg.dart';
-import 'package:tariqi/features/auth/presentation/pages/login_page.dart';
-import 'package:tariqi/features/onboarding/onboarding_page.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

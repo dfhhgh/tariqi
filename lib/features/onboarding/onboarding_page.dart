@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/features/auth/presentation/pages/login_page.dart';
 import 'package:svg_flutter/svg.dart';
-import 'package:tariqi/features/auth/presentation/pages/login_page.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});

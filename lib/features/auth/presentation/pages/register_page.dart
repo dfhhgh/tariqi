@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tariqi/features/auth/presentation/pages/login_page.dart';
+import 'package:flutter_application_1/features/auth/presentation/pages/login_page.dart';
 
 /// صفحة إنشاء حساب جديد
 class RegisterScreen extends StatelessWidget {

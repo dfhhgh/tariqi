@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tariqi/features/splash/splash_screen.dart';
+import 'package:flutter_application_1/features/splash/splash_screen.dart';
 
 void main() {
   runApp(const MyApp());

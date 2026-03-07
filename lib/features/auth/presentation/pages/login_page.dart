@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:tariqi/features/auth/presentation/pages/register_page.dart';
-import 'package:tariqi/features/auth/presentation/pages/reset_password_page.dart';
-import 'package:tariqi/features/home/pages/home_screen.dart';
+import 'package:flutter_application_1/features/auth/presentation/pages/register_page.dart';
+import 'package:flutter_application_1/features/auth/presentation/pages/reset_password_page.dart';
+import 'package:flutter_application_1/features/home/pages/home_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});

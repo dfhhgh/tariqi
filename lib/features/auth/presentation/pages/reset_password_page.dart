@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:tariqi/features/auth/presentation/pages/register_page.dart';
-import 'package:tariqi/features/auth/presentation/pages/reset_password_page_1.dart';
+import 'package:flutter_application_1/features/auth/presentation/pages/register_page.dart';
+import 'package:flutter_application_1/features/auth/presentation/pages/reset_password_page_1.dart';
 
 /// صفحة إنشاء حساب جديد
 class ResetScreen extends StatelessWidget {
