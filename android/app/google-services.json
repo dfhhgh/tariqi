@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "861423827318",
+    "project_id": "tariqi-48165",
+    "storage_bucket": "tariqi-48165.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:861423827318:android:f099f96f8a35e7a8082257",
+        "android_client_info": {
+          "package_name": "com.example.tariqi"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC154_Dgl-bTlnnTN_V-Qxnjzp0m5jxNwA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
