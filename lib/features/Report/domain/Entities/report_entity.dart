@@ -23,5 +23,6 @@ class ReportEntity {
     required this.image,
     required this.dateTime,
     required this.status,
+    required String imagePath,
   });
 }

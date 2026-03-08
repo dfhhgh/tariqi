@@ -46,16 +46,15 @@ class ReportRepositoryImpl implements ReportRepository {
 
         return ReportEntity(
           id: doc.id,
-          userId: data["userId"],
-          governorate: data["governorate"],
-          city: data["city"],
-          street: data["street"],
-          coordinates: data["coordinates"],
-          details: data["details"],
-          image: data["image"],
-          dateTime: data["dateTime"],
+          userId: data["userId"] ?? "",
+          governorate: data["governorate"] ?? "",
+          city: data["city"] ?? "",
+          street: data["street"] ?? "",
+          coordinates: data["coordinates"] ?? "",
+          details: data["details"] ?? "",
+          image: data["image"] ?? "",
+          dateTime: data["createdAt"].toString(),
           status: data["status"] ?? "قيد المراجعة",
-          imagePath: '',
         );
       }).toList();
     });
