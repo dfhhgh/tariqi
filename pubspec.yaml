@@ -24,6 +24,9 @@ dependencies:
   shared_preferences: ^2.2.2
   svg_flutter: ^0.0.1
   camera: ^0.12.0
+  geolocator: ^12.0.0
+  intl: ^0.20.2
+  http: ^1.2.0
 
 dev_dependencies:
   flutter_test:
