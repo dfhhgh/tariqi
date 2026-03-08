@@ -19,33 +19,88 @@ class _AdminReportDetailsScreenState extends State<AdminReportDetailsScreen> {
   String userEmail = "";
   String userName = "";
 
+  /// الحالة الحالية (للتحديث الفوري)
+  late String currentStatus;
+
+  @override
+  void initState() {
+    super.initState();
+    currentStatus = widget.report.status;
+    getUserData();
+  }
+
   /// جلب بيانات المستخدم
   Future<void> getUserData() async {
-    final doc = await FirebaseFirestore.instance
-        .collection("users")
-        .doc(widget.report.userId)
-        .get();
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection("users")
+          .doc(widget.report.userId)
+          .get();
 
-    if (doc.exists) {
-      final data = doc.data();
+      if (doc.exists) {
+        final data = doc.data();
 
-      setState(() {
-        userEmail = data?["email"] ?? "";
-        userName = data?["name"] ?? "";
-      });
+        setState(() {
+          userEmail = data?["email"] ?? "";
+          userName = data?["name"] ?? "";
+        });
+      }
+    } catch (e) {
+      debugPrint("Error fetching user data: $e");
     }
+  }
+
+  /// إرسال إشعار للمستخدم
+  Future<void> sendNotification(String status) async {
+    String message;
+
+    if (status == "approved") {
+      message = "تم إصلاح البلاغ الخاص بك";
+    } else if (status == "rejected") {
+      message = "تم رفض البلاغ الخاص بك";
+    } else {
+      message = "تم إعادة البلاغ إلى قيد المراجعة";
+    }
+
+    await FirebaseFirestore.instance.collection("notifications").add({
+      "userId": widget.report.userId,
+      "title": "تحديث حالة البلاغ",
+      "message": message,
+      "reportId": widget.report.id,
+      "createdAt": FieldValue.serverTimestamp(),
+      "isRead": false,
+    });
   }
 
   /// تغيير حالة البلاغ
   Future<void> updateStatus(String status) async {
-    await FirebaseFirestore.instance
-        .collection("reports")
-        .doc(widget.report.id)
-        .update({
-      "status": status,
-    });
+    try {
+      /// تحديث Firestore
+      await FirebaseFirestore.instance
+          .collection("reports")
+          .doc(widget.report.id)
+          .update({
+        "status": status,
+      });
 
-    Navigator.pop(context);
+      /// إرسال إشعار
+      await sendNotification(status);
+
+      /// تحديث الحالة في الواجهة فورًا
+      setState(() {
+        currentStatus = status;
+      });
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("تم تحديث حالة البلاغ"),
+        ),
+      );
+    } catch (e) {
+      debugPrint("Error updating status: $e");
+    }
   }
 
   /// ترجمة الحالة
@@ -77,15 +132,9 @@ class _AdminReportDetailsScreenState extends State<AdminReportDetailsScreen> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    getUserData();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final statusTitle = getStatusTitle(widget.report.status);
-    final statusColor = getStatusColor(widget.report.status);
+    final statusTitle = getStatusTitle(currentStatus);
+    final statusColor = getStatusColor(currentStatus);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
@@ -115,14 +164,21 @@ class _AdminReportDetailsScreenState extends State<AdminReportDetailsScreen> {
 
               const SizedBox(height: 16),
 
+              /// صورة البلاغ
               ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Image.network(
-                  widget.report.image,
-                  height: 200,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
+                child: widget.report.image.isEmpty
+                    ? Container(
+                        height: 200,
+                        color: Colors.grey[300],
+                        child: const Icon(Icons.image_not_supported),
+                      )
+                    : Image.network(
+                        widget.report.image,
+                        height: 200,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
               ),
 
               const SizedBox(height: 24),
@@ -147,14 +203,13 @@ class _AdminReportDetailsScreenState extends State<AdminReportDetailsScreen> {
 
               const SizedBox(height: 16),
 
+              /// حالة البلاغ
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
                     "حالة الطريق:",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(width: 6),
                   Text(
@@ -170,7 +225,6 @@ class _AdminReportDetailsScreenState extends State<AdminReportDetailsScreen> {
               const SizedBox(height: 24),
 
               /// أزرار التحكم
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -207,13 +261,9 @@ class _AdminReportDetailsScreenState extends State<AdminReportDetailsScreen> {
         children: [
           Text(
             "$title ",
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          Expanded(
-            child: Text(value),
-          ),
+          Expanded(child: Text(value)),
         ],
       ),
     );
@@ -232,10 +282,7 @@ class _AdminReportDetailsScreenState extends State<AdminReportDetailsScreen> {
           color: color.withOpacity(.15),
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Icon(
-          icon,
-          color: color,
-        ),
+        child: Icon(icon, color: color),
       ),
     );
   }
