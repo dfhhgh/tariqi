@@ -3,18 +3,29 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 
 class CloudinaryService {
-  final String cloudName = "dsecpkigi"; // من dashboard
-  final String uploadPreset = "e008lcyx";
+  /// Cloudinary cloud name
+  final String cloudName = "dsecpkigi";
 
-  Future<String> uploadImage(File imageFile) async {
+  /// preset للبلاغات
+  final String reportsPreset = "e008lcyx";
+
+  /// preset للتبرعات
+  final String donationsPreset = "donations";
+
+  Future<String> uploadImage(
+    File imageFile, {
+    required String preset,
+  }) async {
     final url = Uri.parse(
       "https://api.cloudinary.com/v1_1/$cloudName/image/upload",
     );
 
     var request = http.MultipartRequest("POST", url);
 
-    request.fields["upload_preset"] = uploadPreset;
+    /// اختيار preset
+    request.fields["upload_preset"] = preset;
 
+    /// إضافة الصورة
     request.files.add(
       await http.MultipartFile.fromPath(
         "file",
@@ -28,6 +39,10 @@ class CloudinaryService {
 
     var data = json.decode(responseData);
 
-    return data["secure_url"]; // ← هذا هو رابط الصورة
+    if (data["secure_url"] == null) {
+      throw Exception("Cloudinary upload failed: $data");
+    }
+
+    return data["secure_url"];
   }
 }

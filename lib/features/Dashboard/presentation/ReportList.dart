@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/features/Dashboard/presentation/report_details_screen.dart';
-import 'package:flutter_application_1/features/Dashboard/usecases/get_user_reports_usecase.dart';
+import 'package:flutter_application_1/features/Dashboard/domain/usecases/get_user_reports_usecase.dart';
 import 'package:flutter_application_1/features/Dashboard/widgets/ReportCard.dart';
 import 'package:flutter_application_1/features/Report/data/reposrity/report_repository_impl.dart';
 import 'package:flutter_application_1/features/Report/domain/entities/report_entity.dart';

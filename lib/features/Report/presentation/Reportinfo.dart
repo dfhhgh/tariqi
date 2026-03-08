@@ -44,14 +44,15 @@ class _ProblemInfoScreenState extends State<ProblemInfoScreen> {
 
       String imageUrl = "";
 
-      // رفع الصورة إلى Cloudinary
+      /// رفع صورة البلاغ إلى Cloudinary
       if (widget.imagePath != null) {
         imageUrl = await cloudinary.uploadImage(
           File(widget.imagePath!),
+          preset: cloudinary.reportsPreset,
         );
       }
 
-      // الحصول على المستخدم الحالي
+      /// الحصول على المستخدم
       final user = FirebaseAuth.instance.currentUser;
 
       if (user == null) {
@@ -61,7 +62,7 @@ class _ProblemInfoScreenState extends State<ProblemInfoScreen> {
 
       final userId = user.uid;
 
-      // حفظ البلاغ في Firestore
+      /// حفظ البلاغ في Firestore
       await FirebaseFirestore.instance.collection("reports").add({
         "userId": userId,
         "governorate": _governorateController.text.trim(),
@@ -88,8 +89,6 @@ class _ProblemInfoScreenState extends State<ProblemInfoScreen> {
       if (!mounted) return;
 
       _showErrorSnack("خطأ: $e");
-
-      _showErrorSnack("حدث خطأ أثناء إرسال البلاغ");
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);

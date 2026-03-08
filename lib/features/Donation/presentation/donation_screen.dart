@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/features/Donation/payment_details_screen.dart';
-// ⚠️ متنساش تعمل import لشاشة تفاصيل الدفع اللي هنعملها تحت
-// import 'payment_details_screen.dart';
+import 'package:flutter_application_1/features/Donation/presentation/payment_details_screen.dart';
 
 class DonationScreen extends StatelessWidget {
   const DonationScreen({super.key});
@@ -14,10 +12,13 @@ class DonationScreen extends StatelessWidget {
         backgroundColor: const Color(0xFFFAFAFA),
         body: SafeArea(
           child: Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24,
+              vertical: 20,
+            ),
             child: Column(
               children: [
+                /// HEADER
                 Row(
                   children: [
                     InkWell(
@@ -30,25 +31,28 @@ class DonationScreen extends StatelessWidget {
                           color: Color(0xFF55B3E6),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.arrow_forward,
-                            color: Colors.white, size: 28),
+                        child: const Icon(
+                          Icons.arrow_forward,
+                          color: Colors.white,
+                          size: 28,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 20),
                     const Text(
                       'اتبرع لمنطقتك',
                       style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87),
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
                     ),
                   ],
                 ),
+
                 const SizedBox(height: 40),
 
-                // =====================================
-                // هنا ربطنا كل كارت بالشاشة الذكية بتاعتنا
-                // =====================================
+                /// LIST OF PAYMENT METHODS
                 Expanded(
                   child: ListView(
                     physics: const BouncingScrollPhysics(),
@@ -57,25 +61,25 @@ class DonationScreen extends StatelessWidget {
                         context: context,
                         imagePath: 'assets/images/vodafone.png',
                         methodName: 'فودافون كاش',
-                        brandColor: const Color(0xFFE60000), // أحمر فودافون
+                        brandColor: const Color(0xFFE60000),
                       ),
                       _buildPaymentCard(
                         context: context,
                         imagePath: 'assets/images/etisalat.png',
                         methodName: 'اتصالات كاش',
-                        brandColor: const Color(0xFF006A4D), // أخضر اتصالات
+                        brandColor: const Color(0xFF006A4D),
                       ),
                       _buildPaymentCard(
                         context: context,
                         imagePath: 'assets/images/fawry.png',
                         methodName: 'فوري',
-                        brandColor: const Color(0xFFFCCC0A), // أصفر فوري
+                        brandColor: const Color(0xFFFCCC0A),
                       ),
                       _buildPaymentCard(
                         context: context,
                         imagePath: 'assets/images/instapay.png',
                         methodName: 'إنستاباي',
-                        brandColor: const Color(0xFF711A75), // موف إنستاباي
+                        brandColor: const Color(0xFF711A75),
                       ),
                     ],
                   ),
@@ -88,7 +92,7 @@ class DonationScreen extends StatelessWidget {
     );
   }
 
-  // الميثود دي بقت بتاخد الداتا وتفتح الشاشة الجديدة
+  /// PAYMENT CARD
   Widget _buildPaymentCard({
     required BuildContext context,
     required String imagePath,
@@ -97,7 +101,8 @@ class DonationScreen extends StatelessWidget {
   }) {
     return InkWell(
       onTap: () {
-        // بننقل الداتا للشاشة الذكية
+        /// الانتقال لشاشة إدخال المبلغ
+
         Navigator.push(
           context,
           MaterialPageRoute(
