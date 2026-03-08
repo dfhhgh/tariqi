@@ -7,5 +7,8 @@ abstract class AuthRepository {
   Future<void> register({
     required String email,
     required String password,
+    required String name,
   });
+
+  Future<void> resetPassword({required String email});
 }

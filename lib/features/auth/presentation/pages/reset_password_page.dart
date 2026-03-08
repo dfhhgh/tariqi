@@ -1,19 +1,62 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/features/auth/presentation/pages/register_page.dart';
 import 'package:flutter_application_1/features/auth/presentation/pages/reset_password_page_1.dart';
 
 /// صفحة إنشاء حساب جديد
-class ResetScreen extends StatelessWidget {
+class ResetScreen extends StatefulWidget {
   const ResetScreen({super.key});
-
   // ألوان ثابتة مستخرجة من التصميم
   static const Color primaryColor = Color(0xFF53B4E7);
   static const Color backgroundColor = Color(0xFFFAFAFA);
 
   @override
+  State<ResetScreen> createState() => _ResetScreenState();
+}
+
+class _ResetScreenState extends State<ResetScreen> {
+  TextEditingController emailController = TextEditingController();
+
+  // Future<void> resetPassword() async {
+  //   try {
+  //     await FirebaseAuth.instance.sendPasswordResetEmail(
+  //       email: emailController.text.trim(),
+  //     );
+
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(
+  //         content: Text("تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك"),
+  //       ),
+  //     );
+  //   } catch (e) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text(e.toString())),
+  //     );
+  //   }
+  // }
+  Future resetPassword() async {
+    try {
+      await FirebaseAuth.instance
+          .sendPasswordResetEmail(email: emailController.text.trim());
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك"),
+        ),
+      );
+    } on FirebaseAuthException catch (ex) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(ex.message ?? "حدث خطأ"),
+        ),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: ResetScreen.backgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40.0),
@@ -29,7 +72,7 @@ class ResetScreen extends StatelessWidget {
                       width: 50,
                       height: 50,
                       decoration: const BoxDecoration(
-                        color: primaryColor,
+                        color: ResetScreen.primaryColor,
                         shape: BoxShape.circle,
                       ),
                       child: IconButton(
@@ -68,6 +111,7 @@ class ResetScreen extends StatelessWidget {
                 hintText: 'البريد الالكتروني',
                 prefixIcon: Icons.email_outlined,
                 textInputType: TextInputType.emailAddress,
+                controller: emailController,
               ),
               const SizedBox(height: 20),
 
@@ -77,15 +121,7 @@ class ResetScreen extends StatelessWidget {
 
               // زر التسجيل
               ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          const ResetScreen_1(), // الشاشة الجديدة
-                    ),
-                  );
-                },
+                onPressed: resetPassword,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: RegisterScreen.primaryColor,
                   foregroundColor: Colors.white,
@@ -112,8 +148,8 @@ class ResetScreen extends StatelessWidget {
     );
   }
 
-  /// دالة مساعدة لبناء حقول الإدخال بشكل موحد
   Widget _buildTextField({
+    required TextEditingController controller,
     required String hintText,
     required IconData prefixIcon,
     IconData? suffixIcon,
@@ -134,7 +170,8 @@ class ResetScreen extends StatelessWidget {
       ),
       child: Directionality(
         textDirection: TextDirection.rtl,
-        child: TextField(
+        child: TextFormField(
+          controller: controller,
           obscureText: obscureText,
           keyboardType: textInputType,
           maxLines: 1,
@@ -156,7 +193,8 @@ class ResetScreen extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: primaryColor, width: 1.5),
+              borderSide:
+                  BorderSide(color: ResetScreen.primaryColor, width: 1.5),
             ),
             contentPadding: const EdgeInsets.symmetric(vertical: 20),
           ),

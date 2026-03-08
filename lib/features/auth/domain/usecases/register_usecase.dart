@@ -5,10 +5,15 @@ class RegisterUseCase {
 
   RegisterUseCase(this.repository);
 
-  Future<void> call(String email, String password) {
+  Future<void> call(
+    String email,
+    String password,
+    String name,
+  ) {
     return repository.register(
       email: email,
       password: password,
+      name: name,
     );
   }
 }

@@ -3,12 +3,15 @@ import 'package:flutter_application_1/features/auth/presentation/pages/login_pag
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/features/auth/domain/usecases/register_usecase.dart';
 import 'package:flutter_application_1/features/auth/data/reposrity/auth_repository_impl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// صفحة إنشاء حساب جديد
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
   static const Color primaryColor = Color(0xFF53B4E7);
   static const Color backgroundColor = Color(0xFFFAFAFA);
+
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
 }
@@ -23,9 +26,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
-  final registerUseCase = RegisterUseCase(
-    AuthRepositoryImpl(FirebaseAuth.instance),
-  );
+  bool _isLoading = false;
+
+  late final RegisterUseCase registerUseCase;
+
+  @override
+  void initState() {
+    super.initState();
+
+    registerUseCase = RegisterUseCase(
+      AuthRepositoryImpl(FirebaseAuth.instance),
+    );
+  }
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -38,36 +51,37 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
 
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
       await registerUseCase(
         _emailController.text.trim(),
         _passwordController.text.trim(),
+        _nameController.text.trim(),
       );
 
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("تم إنشاء الحساب بنجاح"),
-        ),
+        const SnackBar(content: Text("تم إنشاء الحساب بنجاح")),
       );
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (_) => const LoginScreen(),
-        ),
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
       );
-    } on FirebaseAuthException catch (e) {
-      String message = "حدث خطأ";
-
-      if (e.code == 'email-already-in-use') {
-        message = "البريد مستخدم بالفعل";
-      } else if (e.code == 'weak-password') {
-        message = "كلمة المرور ضعيفة";
-      }
-
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
+        SnackBar(content: Text(e.toString())),
       );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -229,14 +243,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 // ── زر التسجيل ────────────────────────────────────────
                 ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      // TODO: تنفيذ منطق التسجيل
-                    }
-                  },
+                  onPressed: _isLoading ? null : _register,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: RegisterScreen.primaryColor,
                     foregroundColor: Colors.white,
+                    disabledBackgroundColor:
+                        RegisterScreen.primaryColor.withOpacity(0.6),
                     padding: const EdgeInsets.symmetric(vertical: 18),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -244,10 +256,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     elevation: 2,
                     shadowColor: RegisterScreen.primaryColor.withOpacity(0.5),
                   ),
-                  child: const Text(
-                    'تسجيل',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
+                  child: _isLoading
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2.5,
+                          ),
+                        )
+                      : const Text(
+                          'تسجيل',
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
                 ),
                 const SizedBox(height: 40),
 
