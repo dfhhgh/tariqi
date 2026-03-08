@@ -47,6 +47,10 @@ flutter:
     - assets/icons/Onboarding_1.svg
     - assets/icons/Onboarding_2.svg
     - assets/icons/Onboarding_3.svg
+    - assets/images/vodafone.png
+    - assets/images/etisalat.png
+    - assets/images/fawry.png
+    - assets/images/instapay.png
 
   fonts:
     - family: Almarai

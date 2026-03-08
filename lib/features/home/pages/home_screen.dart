@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/features/Dashboard/presentation/ReportList.dart';
 import 'package:flutter_application_1/features/camra/presentation/camera_screen.dart';
+import 'package:flutter_application_1/features/profile/presentation/pages/profile_screen.dart';
 
 void main() => runApp(const MyReportApp());
 
@@ -30,7 +31,7 @@ class _MainScreenState extends State<MainScreen> {
 
   // قائمة الشاشات بنفس ترتيب الـ NavBar
   final List<Widget> _screens = const [
-    AccountScreen(), // index 0 - الحساب
+    ProfileScreen(), // index 0 - الحساب
     CameraScreen(), // index 1 - الكاميرا
     ReportsList(), // index 2 - لوحة المعلومات
   ];
@@ -60,26 +61,6 @@ class _MainScreenState extends State<MainScreen> {
             label: 'لوحة المعلومات',
           ),
         ],
-      ),
-    );
-  }
-}
-
-// ─── شاشة التقارير ───────────────────────────────────────────────────────────
-
-// ─── شاشة الحساب (placeholder) ───────────────────────────────────────────────
-
-class AccountScreen extends StatelessWidget {
-  const AccountScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text(
-          'صفحة الحساب',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
       ),
     );
   }

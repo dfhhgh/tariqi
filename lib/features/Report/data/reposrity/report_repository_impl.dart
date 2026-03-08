@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 import '../../domain/entities/report_entity.dart';
 import '../../domain/repository/report_repository.dart';
 
@@ -41,9 +42,9 @@ class ReportRepositoryImpl implements ReportRepository {
         .where("userId", isEqualTo: userId)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs.map((doc) {
+      return snapshot.docs.map<ReportEntity>((doc) {
         final data = doc.data();
-
+        final timestamp = data['createdAt'] as Timestamp;
         return ReportEntity(
           id: doc.id,
           userId: data["userId"] ?? "",
@@ -53,7 +54,8 @@ class ReportRepositoryImpl implements ReportRepository {
           coordinates: data["coordinates"] ?? "",
           details: data["details"] ?? "",
           image: data["image"] ?? "",
-          dateTime: data["createdAt"].toString(),
+          dateTime:
+              DateFormat('yyyy/MM/dd - hh:mm a').format(timestamp.toDate()),
           status: data["status"] ?? "قيد المراجعة",
         );
       }).toList();

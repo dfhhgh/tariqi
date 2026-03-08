@@ -64,4 +64,10 @@ class AuthRepositoryImpl implements AuthRepository {
       email: email,
     );
   }
+  // ================= Sign Out =================
+
+  @override
+  Future<void> signOut() async {
+    await firebaseAuth.signOut();
+  }
 }
