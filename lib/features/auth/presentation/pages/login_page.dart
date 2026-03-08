@@ -3,8 +3,10 @@ import 'package:flutter_application_1/features/auth/data/reposrity/auth_reposito
 import 'package:flutter_application_1/features/auth/domain/usecases/login_usecase.dart';
 import 'package:flutter_application_1/features/auth/presentation/pages/register_page.dart';
 import 'package:flutter_application_1/features/auth/presentation/pages/reset_password_page.dart';
+import 'package:flutter_application_1/features/auth/presentation/pages/role_gate.dart';
 import 'package:flutter_application_1/features/home/pages/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_application_1/features/splash/splash_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -49,9 +51,12 @@ class _LoginScreenState extends State<LoginScreen> {
       // 3. التأكد من أن الـ widget لا يزال موجوداً بعد العملية الـ async
       if (!mounted) return;
 
-      Navigator.pushReplacement(
+      Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (_) => const MyReportApp()),
+        MaterialPageRoute(
+          builder: (_) => const RoleGate(),
+        ),
+        (route) => false,
       );
     } on FirebaseAuthException catch (e) {
       // 4. تمييز أنواع الأخطاء وإظهار رسائل واضحة للمستخدم

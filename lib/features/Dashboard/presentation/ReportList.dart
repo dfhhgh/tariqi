@@ -10,6 +10,34 @@ import 'package:flutter_application_1/features/Report/domain/entities/report_ent
 class ReportsList extends StatelessWidget {
   const ReportsList({super.key});
 
+  /// تحويل الحالة إلى نص عربي
+  String getStatusTitle(String status) {
+    switch (status) {
+      case "approved":
+        return "تم الإصلاح";
+
+      case "rejected":
+        return "مرفوض";
+
+      default:
+        return "قيد المراجعة";
+    }
+  }
+
+  /// لون الحالة
+  Color getStatusColor(String status) {
+    switch (status) {
+      case "approved":
+        return Colors.green;
+
+      case "rejected":
+        return Colors.red;
+
+      default:
+        return Colors.orange;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final repository =
@@ -50,6 +78,10 @@ class ReportsList extends StatelessWidget {
           itemBuilder: (context, index) {
             final report = reports[index];
 
+            /// تحويل الحالة
+            final statusTitle = getStatusTitle(report.status);
+            final statusColor = getStatusColor(report.status);
+
             return Column(
               children: [
                 InkWell(
@@ -62,10 +94,8 @@ class ReportsList extends StatelessWidget {
                     );
                   },
                   child: ReportCard(
-                    title: report.status,
-                    titleColor: report.status == "تم الإصلاح"
-                        ? Colors.green
-                        : Colors.orange,
+                    title: statusTitle,
+                    titleColor: statusColor,
                     imageUrl: report.image,
                   ),
                 ),

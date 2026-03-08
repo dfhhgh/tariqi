@@ -71,6 +71,7 @@ class _ProblemInfoScreenState extends State<ProblemInfoScreen> {
         "street": _streetController.text.trim(),
         "details": _detailsController.text.trim(),
         "image": imageUrl,
+        "status": "pending",
         "createdAt": FieldValue.serverTimestamp(),
       });
 
