@@ -8,98 +8,108 @@ class ControlPanelScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF9F9F9),
-      body: SafeArea(
-        child: StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance.collection("reports").snapshots(),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return Center(
-                child: CircularProgressIndicator(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              );
-            }
-
-            final reports = snapshot.data!.docs;
-
-            if (reports.isEmpty) {
-              return Center(
-                child: Text(
-                  "لا يوجد بلاغات",
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              );
-            }
-
-            return ListView.builder(
-              padding: const EdgeInsets.all(20),
-              itemCount: reports.length,
-              itemBuilder: (context, index) {
-                final data = reports[index];
-                final map = data.data() as Map<String, dynamic>;
-                final status = map["status"] ?? "pending";
-                final imageUrl = map["image"] ?? "";
-
-                // تحويل البيانات إلى Entity
-                final report = ReportEntity(
-                  id: data.id,
-                  userId: map["userId"] ?? "",
-                  governorate: map["governorate"] ?? "",
-                  coordinates: map["coordinates"] ?? "",
-                  city: map["city"] ?? "",
-                  street: map["street"] ?? "",
-                  details: map["details"] ?? "",
-                  image: imageUrl,
-                  status: status,
-                  dateTime: map["dateTime"] ?? "",
-                );
-
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 30),
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => AdminReportDetailsScreen(
-                            report: report,
-                          ),
-                        ),
-                      );
-                    },
-                    child: _buildAdminCard(
-                      context: context,
-                      title: _getTitle(status),
-                      titleColor: _getColor(status),
-                      imageUrl: imageUrl,
-                      showClockButton: status != "pending",
-                      onApprove: () {
-                        _updateStatus(data.id, "approved");
-                      },
-                      onReject: () {
-                        _updateStatus(data.id, "rejected");
-                      },
-                      onPending: () {
-                        _updateStatus(data.id, "pending");
-                      },
-                    ),
-                  ),
-                );
-              },
-            );
-          },
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF9F9F9),
+        appBar: AppBar(
+          title: const Text("لوحة التحكم"),
+          centerTitle: true,
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
+          elevation: 0,
+          bottom: const TabBar(
+            tabs: [
+              Tab(text: "قيد المراجعة"),
+              Tab(text: "تم الإصلاح"),
+              Tab(text: "المرفوضة"),
+            ],
+          ),
+        ),
+        body: const TabBarView(
+          children: [
+            ReportsTab(status: "pending"),
+            ReportsTab(status: "approved"),
+            ReportsTab(status: "rejected"),
+          ],
         ),
       ),
     );
   }
+}
 
-  /// تحديث حالة البلاغ
-  void _updateStatus(String reportId, String status) {
-    FirebaseFirestore.instance.collection("reports").doc(reportId).update({
-      "status": status,
-    });
+class ReportsTab extends StatelessWidget {
+  final String status;
+
+  const ReportsTab({super.key, required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection("reports")
+          .where("status", isEqualTo: status)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        final reports = snapshot.data!.docs;
+
+        if (reports.isEmpty) {
+          return const Center(
+            child: Text("لا يوجد بلاغات"),
+          );
+        }
+
+        return ListView.builder(
+          padding: const EdgeInsets.all(20),
+          itemCount: reports.length,
+          itemBuilder: (context, index) {
+            final data = reports[index];
+            final map = data.data() as Map<String, dynamic>;
+
+            final imageUrl = map["image"] ?? "";
+
+            final report = ReportEntity(
+              id: data.id,
+              userId: map["userId"] ?? "",
+              governorate: map["governorate"] ?? "",
+              coordinates: map["coordinates"] ?? "",
+              city: map["city"] ?? "",
+              street: map["street"] ?? "",
+              details: map["details"] ?? "",
+              image: imageUrl,
+              status: status,
+              dateTime: map["dateTime"] ?? "",
+            );
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 30),
+              child: InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => AdminReportDetailsScreen(report: report),
+                    ),
+                  );
+                },
+                child: _buildAdminCard(
+                  context: context,
+                  title: _getTitle(status),
+                  titleColor: _getColor(status),
+                  imageUrl: imageUrl,
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   /// لون الحالة
@@ -132,10 +142,6 @@ class ControlPanelScreen extends StatelessWidget {
     required String title,
     required Color titleColor,
     required String imageUrl,
-    required bool showClockButton,
-    required VoidCallback onApprove,
-    required VoidCallback onReject,
-    VoidCallback? onPending,
   }) {
     return Center(
       child: Container(
@@ -148,16 +154,17 @@ class ControlPanelScreen extends StatelessWidget {
         ),
         child: Column(
           children: [
-            // الحالة
+            /// الحالة
             Text(
               title,
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     color: titleColor,
                   ),
             ),
+
             const SizedBox(height: 16),
 
-            // صورة البلاغ
+            /// الصورة
             ClipRRect(
               borderRadius: BorderRadius.circular(18),
               child: imageUrl.isEmpty
@@ -165,11 +172,7 @@ class ControlPanelScreen extends StatelessWidget {
                       width: 260,
                       height: 180,
                       color: Colors.grey[300],
-                      child: Icon(
-                        Icons.image_not_supported,
-                        size: 40,
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
-                      ),
+                      child: const Icon(Icons.image_not_supported, size: 40),
                     )
                   : Image.network(
                       imageUrl,
@@ -178,71 +181,7 @@ class ControlPanelScreen extends StatelessWidget {
                       fit: BoxFit.cover,
                     ),
             ),
-
-            const SizedBox(height: 20),
-
-            // الأزرار
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // قبول
-                _buildActionButton(
-                  icon: Icons.check,
-                  iconColor: const Color(0xFF4CAF50),
-                  backgroundColor: const Color(0xFFC8E6C9),
-                  onTap: onApprove,
-                ),
-                const SizedBox(width: 12),
-
-                // رفض
-                _buildActionButton(
-                  icon: Icons.close,
-                  iconColor: const Color(0xFFF44336),
-                  backgroundColor: const Color(0xFFFFCDD2),
-                  onTap: onReject,
-                ),
-
-                // إعادة للمراجعة
-                if (showClockButton) ...[
-                  const SizedBox(width: 12),
-                  _buildActionButton(
-                    icon: Icons.access_time_filled,
-                    iconColor: const Color(0xFFFFB300),
-                    backgroundColor: const Color(0xFFFFF9C4),
-                    onTap: onPending ?? () {},
-                  ),
-                ],
-              ],
-            ),
           ],
-        ),
-      ),
-    );
-  }
-
-  /// زر التحكم
-  Widget _buildActionButton({
-    required IconData icon,
-    required Color iconColor,
-    required Color backgroundColor,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 10,
-        ),
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Icon(
-          icon,
-          color: iconColor,
-          size: 26,
         ),
       ),
     );
