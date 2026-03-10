@@ -31,9 +31,9 @@ class _MainScreenState extends State<MainScreen> {
 
   // قائمة الشاشات بنفس ترتيب الـ NavBar
   final List<Widget> _screens = const [
-    ProfileScreen(), // index 0 - الحساب
-    CameraScreen(), // index 1 - الكاميرا
-    ReportsList(), // index 2 - لوحة المعلومات
+    ProfileScreen(),
+    CameraScreen(),
+    ReportsList(),
   ];
 
   @override
