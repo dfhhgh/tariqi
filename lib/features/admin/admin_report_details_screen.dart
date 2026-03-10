@@ -18,51 +18,82 @@ class AdminReportDetailsScreen extends StatefulWidget {
 class _AdminReportDetailsScreenState extends State<AdminReportDetailsScreen> {
   String userEmail = "";
   String userName = "";
+  
+  get textDirectio => null;
 
-  /// جلب بيانات المستخدم
   Future<void> getUserData() async {
-    final doc = await FirebaseFirestore.instance
-        .collection("users")
-        .doc(widget.report.userId)
-        .get();
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection("users")
+          .doc(widget.report.userId)
+          .get();
 
-    if (doc.exists) {
-      final data = doc.data();
+      if (doc.exists) {
+        final data = doc.data();
 
-      setState(() {
-        userEmail = data?["email"] ?? "";
-        userName = data?["name"] ?? "";
-      });
+        setState(() {
+          userEmail = data?["email"] ?? "";
+          userName = data?["name"] ?? "";
+        });
+      }
+    } catch (e) {
+      debugPrint("Error fetching user data: $e");
     }
   }
 
-  /// تغيير حالة البلاغ
-  Future<void> updateStatus(String status) async {
-    await FirebaseFirestore.instance
-        .collection("reports")
-        .doc(widget.report.id)
-        .update({
-      "status": status,
-    });
+  Future<void> sendNotification(String status) async {
+    String message = "";
 
-    Navigator.pop(context);
+    if (status == "approved") {
+      message = "تم إصلاح البلاغ الخاص بك";
+    } else if (status == "rejected") {
+      message = "تم رفض البلاغ الخاص بك";
+    } else {
+      message = "تم إعادة البلاغ إلى قيد المراجعة";
+    }
+
+    await FirebaseFirestore.instance.collection("notifications").add({
+      "userId": widget.report.userId,
+      "title": "تحديث حالة البلاغ",
+      "message": message,
+      "reportId": widget.report.id,
+      "createdAt": FieldValue.serverTimestamp(),
+      "isRead": false,
+    });
   }
 
-  /// ترجمة الحالة
+  Future<void> updateStatus(String status) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection("reports")
+          .doc(widget.report.id)
+          .update({
+        "status": status,
+      });
+
+      await sendNotification(status);
+
+      if (!mounted) return;
+
+      Navigator.pop(context);
+    } catch (e) {
+      debugPrint("Error updating status: $e");
+    }
+  }
+
   String getStatusTitle(String status) {
     switch (status) {
       case "approved":
-        return "تم الإصلاح";
+        return "تم الإصلاح شكرا لتعاونك في توثيق حالة الشارع والمساهمة في تحسينه";
 
       case "rejected":
-        return "مرفوض";
+        return "تم رفض البلاغ نظرًا لعدم دقة المعلومات أو لكون الصورة المرفقة لا تعكس الحالة الواقعية للموقع";
 
       default:
-        return "قيد المراجعة";
+        return "قيد المراجعة سيتم إبلاغك عند الانتهاء";
     }
   }
 
-  /// لون الحالة
   Color getStatusColor(String status) {
     switch (status) {
       case "approved":
@@ -83,11 +114,14 @@ class _AdminReportDetailsScreenState extends State<AdminReportDetailsScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final statusTitle = getStatusTitle(widget.report.status);
-    final statusColor = getStatusColor(widget.report.status);
+  @override
+Widget build(BuildContext context) {
+  final statusTitle = getStatusTitle(widget.report.status);
+  final statusColor = getStatusColor(widget.report.status);
 
-    return Scaffold(
+  return Directionality(
+    textDirection: TextDirection.rtl,
+    child: Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
         title: const Text("تفاصيل البلاغ"),
@@ -104,6 +138,7 @@ class _AdminReportDetailsScreenState extends State<AdminReportDetailsScreen> {
             borderRadius: BorderRadius.circular(20),
           ),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
                 "صورة الطريق",
@@ -112,21 +147,23 @@ class _AdminReportDetailsScreenState extends State<AdminReportDetailsScreen> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-
               const SizedBox(height: 16),
-
               ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Image.network(
-                  widget.report.image,
-                  height: 200,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
+                child: widget.report.image.isEmpty
+                    ? Container(
+                        height: 200,
+                        color: Colors.grey[300],
+                        child: const Icon(Icons.image_not_supported),
+                      )
+                    : Image.network(
+                        widget.report.image,
+                        height: 200,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
               ),
-
               const SizedBox(height: 24),
-
               const Text(
                 "معلومات المشكلة",
                 style: TextStyle(
@@ -134,9 +171,7 @@ class _AdminReportDetailsScreenState extends State<AdminReportDetailsScreen> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-
               const SizedBox(height: 20),
-
               _buildInfo("الاسم:", userName),
               _buildInfo("البريد الإلكتروني:", userEmail),
               _buildInfo("المحافظة:", widget.report.governorate),
@@ -144,33 +179,29 @@ class _AdminReportDetailsScreenState extends State<AdminReportDetailsScreen> {
               _buildInfo("اسم الشارع:", widget.report.street),
               _buildInfo("المدينة:", widget.report.city),
               _buildInfo("الوصف:", widget.report.details),
-
               const SizedBox(height: 16),
-
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    "حالة الطريق:",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
+                    "حالة الطريق: ",
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(width: 6),
-                  Text(
-                    statusTitle,
-                    style: TextStyle(
-                      color: statusColor,
-                      fontWeight: FontWeight.bold,
+                  Expanded(
+                    child: Text(
+                      statusTitle,
+                      style: TextStyle(
+                        color: statusColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                      softWrap: true,
+                      overflow: TextOverflow.visible,
                     ),
                   ),
                 ],
               ),
-
               const SizedBox(height: 24),
-
-              /// أزرار التحكم
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -197,8 +228,9 @@ class _AdminReportDetailsScreenState extends State<AdminReportDetailsScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildInfo(String title, String value) {
     return Padding(
@@ -207,13 +239,9 @@ class _AdminReportDetailsScreenState extends State<AdminReportDetailsScreen> {
         children: [
           Text(
             "$title ",
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          Expanded(
-            child: Text(value),
-          ),
+          Expanded(child: Text(value)),
         ],
       ),
     );
@@ -232,10 +260,7 @@ class _AdminReportDetailsScreenState extends State<AdminReportDetailsScreen> {
           color: color.withOpacity(.15),
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Icon(
-          icon,
-          color: color,
-        ),
+        child: Icon(icon, color: color),
       ),
     );
   }

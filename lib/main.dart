@@ -21,16 +21,37 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // هذه الطبعة للطباعة في Debug فقط
+    debugPrint(Theme.of(context).textTheme.bodyMedium?.fontFamily);
     return MaterialApp(
-      // شيلنا const من هنا
       debugShowCheckedModeBanner: false,
       home: const SplashScreen(),
-      // أول ش
       theme: ThemeData(
-        fontFamily: 'Almarai', // هنا الفونت الموحد
+        fontFamily: 'Almarai', // الخط الأساسي
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
+
+        // يفرض الخط على كل النصوص
+        textTheme: ThemeData.light().textTheme.apply(
+              fontFamily: 'Almarai',
+            ),
+        inputDecorationTheme: const InputDecorationTheme(
+          hintStyle: TextStyle(fontFamily: 'Almarai'),
+          labelStyle: TextStyle(fontFamily: 'Almarai'),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            textStyle: const TextStyle(fontFamily: 'Almarai'),
+          ),
+        ),
       ),
+      builder: (context, child) {
+        // يفرض الخط على كل النصوص حتى الـ const Text
+        return DefaultTextStyle.merge(
+          style: const TextStyle(fontFamily: 'Almarai'),
+          child: child!,
+        );
+      },
     );
   }
 }
@@ -61,7 +82,11 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text('You have pushed the button this many times:'),
+            // تم إزالة const ليطبق Theme على النص
+            Text(
+              'You have pushed the button this many times:',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
             Text(
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,

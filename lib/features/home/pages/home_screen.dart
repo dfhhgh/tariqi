@@ -10,14 +10,17 @@ class MyReportApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: MainScreen(),
+      theme: ThemeData(
+        fontFamily: 'Almarai', // كل النصوص هتستخدم Almarai تلقائي
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+      ),
+      home: const MainScreen(),
     );
   }
 }
-
-// ─── الشاشة الرئيسية التي تحتوي على الـ NavBar ──────────────────────────────
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -27,13 +30,12 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 2; // لوحة المعلومات هي الافتراضية
+  int _currentIndex = 2;
 
-  // قائمة الشاشات بنفس ترتيب الـ NavBar
   final List<Widget> _screens = const [
-    ProfileScreen(), // index 0 - الحساب
-    CameraScreen(), // index 1 - الكاميرا
-    ReportsList(), // index 2 - لوحة المعلومات
+    ProfileScreen(),
+    CameraScreen(),
+    ReportsList(),
   ];
 
   @override

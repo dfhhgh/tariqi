@@ -59,6 +59,7 @@ class _ProblemInfoScreenState extends State<ProblemInfoScreen> {
         _showErrorSnack("يجب تسجيل الدخول أولاً");
         return;
       }
+      
 
       final userId = user.uid;
 

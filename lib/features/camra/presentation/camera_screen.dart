@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter_application_1/features/camra/presentation/camera_confirm.dart';
@@ -33,66 +32,75 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   Future<void> initCamera() async {
-    cameras = await availableCameras();
+    try {
+      cameras = await availableCameras();
+      if (cameras!.isEmpty) return;
 
-    controller = CameraController(
-      cameras![0],
-      ResolutionPreset.high,
-    );
+      controller = CameraController(
+        cameras![0],
+        ResolutionPreset.high,
+      );
 
-    await controller!.initialize();
+      await controller!.initialize();
 
-    minZoom = await controller!.getMinZoomLevel();
-    maxZoom = await controller!.getMaxZoomLevel();
+      minZoom = await controller!.getMinZoomLevel();
+      maxZoom = await controller!.getMaxZoomLevel();
 
-    if (mounted) setState(() {});
+      if (!mounted) return;
+      setState(() {});
+    } catch (e) {
+      debugPrint('Error initializing camera: $e');
+    }
   }
 
-  // 📷 التقاط صورة والانتقال لصفحة التأكيد
   Future<void> takePhoto() async {
     if (controller == null || !controller!.value.isInitialized) return;
 
-    final photo = await controller!.takePicture();
+    try {
+      final photo = await controller!.takePicture();
+      if (!mounted) return;
 
-    if (!mounted) return;
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => PhotoConfirmScreen(imagePath: photo.path),
-      ),
-    );
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => PhotoConfirmScreen(imagePath: photo.path),
+        ),
+      );
+    } catch (e) {
+      debugPrint('Error taking photo: $e');
+    }
   }
 
-  // 🖼️ اختيار صورة من المعرض والانتقال لصفحة التأكيد
   Future<void> pickFromGallery() async {
     final picker = ImagePicker();
+    try {
+      final picked = await picker.pickImage(source: ImageSource.gallery);
+      if (picked == null || !mounted) return;
 
-    final picked = await picker.pickImage(source: ImageSource.gallery);
-
-    if (picked == null) return;
-    if (!mounted) return;
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => PhotoConfirmScreen(imagePath: picked.path),
-      ),
-    );
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => PhotoConfirmScreen(imagePath: picked.path),
+        ),
+      );
+    } catch (e) {
+      debugPrint('Error picking image: $e');
+    }
   }
 
-  // 🔍 التحكم في الزوم
   Future<void> setZoom(double value) async {
+    if (controller == null || !controller!.value.isInitialized) return;
     await controller!.setZoomLevel(value);
-    if (mounted) setState(() => currentZoom = value);
+    if (!mounted) return;
+    setState(() => currentZoom = value);
   }
 
   @override
   Widget build(BuildContext context) {
     if (controller == null || !controller!.value.isInitialized) {
-      return const Scaffold(
+      return Scaffold(
         backgroundColor: Colors.black,
-        body: Center(
+        body: const Center(
           child: CircularProgressIndicator(color: Colors.white),
         ),
       );
@@ -101,10 +109,7 @@ class _CameraScreenState extends State<CameraScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // ── معاينة الكاميرا ──────────────────────────────────────
           CameraPreview(controller!),
-
-          // ── Slider الزوم ─────────────────────────────────────────
           Positioned(
             bottom: 150,
             left: 20,
@@ -118,8 +123,6 @@ class _CameraScreenState extends State<CameraScreen> {
               onChanged: (value) => setZoom(value),
             ),
           ),
-
-          // ── الأزرار ───────────────────────────────────────────────
           Positioned(
             bottom: 40,
             left: 20,
@@ -127,14 +130,11 @@ class _CameraScreenState extends State<CameraScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // زر المعرض
                 IconButton(
                   icon: const Icon(Icons.photo, size: 35),
                   color: Colors.white,
                   onPressed: pickFromGallery,
                 ),
-
-                // زر التصوير
                 GestureDetector(
                   onTap: takePhoto,
                   child: Container(
@@ -152,8 +152,6 @@ class _CameraScreenState extends State<CameraScreen> {
                     ),
                   ),
                 ),
-
-                // مكان فارغ للتوازن
                 const SizedBox(width: 50),
               ],
             ),

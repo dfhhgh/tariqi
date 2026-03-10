@@ -25,4 +25,19 @@ class ReportEntity {
     required this.dateTime,
     required this.status,
   });
+
+  Future<ReportEntity> copyWith({required String status}) async {
+    return ReportEntity(
+      id: id,
+      userId: userId,
+      governorate: governorate,
+      city: city,
+      street: street,
+      coordinates: coordinates,
+      details: details,
+      image: image,
+      dateTime: dateTime,
+      status: status,
+    );
+  }
 }

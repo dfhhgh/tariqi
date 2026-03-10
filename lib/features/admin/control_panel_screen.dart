@@ -15,16 +15,21 @@ class ControlPanelScreen extends StatelessWidget {
           stream: FirebaseFirestore.instance.collection("reports").snapshots(),
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
-              return const Center(
-                child: CircularProgressIndicator(),
+              return Center(
+                child: CircularProgressIndicator(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               );
             }
 
             final reports = snapshot.data!.docs;
 
             if (reports.isEmpty) {
-              return const Center(
-                child: Text("لا يوجد بلاغات"),
+              return Center(
+                child: Text(
+                  "لا يوجد بلاغات",
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
               );
             }
 
@@ -33,14 +38,11 @@ class ControlPanelScreen extends StatelessWidget {
               itemCount: reports.length,
               itemBuilder: (context, index) {
                 final data = reports[index];
-
                 final map = data.data() as Map<String, dynamic>;
-
                 final status = map["status"] ?? "pending";
-
                 final imageUrl = map["image"] ?? "";
 
-                /// تحويل البيانات إلى Entity
+                // تحويل البيانات إلى Entity
                 final report = ReportEntity(
                   id: data.id,
                   userId: map["userId"] ?? "",
@@ -68,6 +70,7 @@ class ControlPanelScreen extends StatelessWidget {
                       );
                     },
                     child: _buildAdminCard(
+                      context: context,
                       title: _getTitle(status),
                       titleColor: _getColor(status),
                       imageUrl: imageUrl,
@@ -104,10 +107,8 @@ class ControlPanelScreen extends StatelessWidget {
     switch (status) {
       case "approved":
         return Colors.green;
-
       case "rejected":
         return Colors.red;
-
       default:
         return const Color(0xFFFFD03A);
     }
@@ -118,10 +119,8 @@ class ControlPanelScreen extends StatelessWidget {
     switch (status) {
       case "approved":
         return "تم الإصلاح";
-
       case "rejected":
         return "مرفوض";
-
       default:
         return "قيد المراجعة";
     }
@@ -129,6 +128,7 @@ class ControlPanelScreen extends StatelessWidget {
 
   /// كارت البلاغ
   Widget _buildAdminCard({
+    required BuildContext context,
     required String title,
     required Color titleColor,
     required String imageUrl,
@@ -148,20 +148,16 @@ class ControlPanelScreen extends StatelessWidget {
         ),
         child: Column(
           children: [
-            /// الحالة
+            // الحالة
             Text(
               title,
-              style: TextStyle(
-                color: titleColor,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                fontFamily: "Cairo",
-              ),
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    color: titleColor,
+                  ),
             ),
-
             const SizedBox(height: 16),
 
-            /// صورة البلاغ
+            // صورة البلاغ
             ClipRRect(
               borderRadius: BorderRadius.circular(18),
               child: imageUrl.isEmpty
@@ -169,9 +165,10 @@ class ControlPanelScreen extends StatelessWidget {
                       width: 260,
                       height: 180,
                       color: Colors.grey[300],
-                      child: const Icon(
+                      child: Icon(
                         Icons.image_not_supported,
                         size: 40,
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
                       ),
                     )
                   : Image.network(
@@ -184,21 +181,20 @@ class ControlPanelScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            /// الأزرار
+            // الأزرار
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                /// قبول
+                // قبول
                 _buildActionButton(
                   icon: Icons.check,
                   iconColor: const Color(0xFF4CAF50),
                   backgroundColor: const Color(0xFFC8E6C9),
                   onTap: onApprove,
                 ),
-
                 const SizedBox(width: 12),
 
-                /// رفض
+                // رفض
                 _buildActionButton(
                   icon: Icons.close,
                   iconColor: const Color(0xFFF44336),
@@ -206,7 +202,7 @@ class ControlPanelScreen extends StatelessWidget {
                   onTap: onReject,
                 ),
 
-                /// إعادة للمراجعة
+                // إعادة للمراجعة
                 if (showClockButton) ...[
                   const SizedBox(width: 12),
                   _buildActionButton(
