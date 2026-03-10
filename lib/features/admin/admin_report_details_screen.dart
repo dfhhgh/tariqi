@@ -18,9 +18,18 @@ class AdminReportDetailsScreen extends StatefulWidget {
 class _AdminReportDetailsScreenState extends State<AdminReportDetailsScreen> {
   String userEmail = "";
   String userName = "";
-  
-  get textDirectio => null;
 
+  /// الحالة الحالية
+  late String currentStatus;
+
+  @override
+  void initState() {
+    super.initState();
+    currentStatus = widget.report.status;
+    getUserData();
+  }
+
+  /// جلب بيانات المستخدم
   Future<void> getUserData() async {
     try {
       final doc = await FirebaseFirestore.instance
@@ -41,8 +50,9 @@ class _AdminReportDetailsScreenState extends State<AdminReportDetailsScreen> {
     }
   }
 
+  /// إرسال إشعار للمستخدم
   Future<void> sendNotification(String status) async {
-    String message = "";
+    String message;
 
     if (status == "approved") {
       message = "تم إصلاح البلاغ الخاص بك";
@@ -62,6 +72,7 @@ class _AdminReportDetailsScreenState extends State<AdminReportDetailsScreen> {
     });
   }
 
+  /// تغيير حالة البلاغ
   Future<void> updateStatus(String status) async {
     try {
       await FirebaseFirestore.instance
@@ -73,9 +84,17 @@ class _AdminReportDetailsScreenState extends State<AdminReportDetailsScreen> {
 
       await sendNotification(status);
 
+      setState(() {
+        currentStatus = status;
+      });
+
       if (!mounted) return;
 
-      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("تم تحديث حالة البلاغ"),
+        ),
+      );
     } catch (e) {
       debugPrint("Error updating status: $e");
     }
@@ -108,129 +127,131 @@ class _AdminReportDetailsScreenState extends State<AdminReportDetailsScreen> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    getUserData();
-  }
+  Widget build(BuildContext context) {
+    final statusTitle = getStatusTitle(currentStatus);
+    final statusColor = getStatusColor(currentStatus);
 
-  @override
-  @override
-Widget build(BuildContext context) {
-  final statusTitle = getStatusTitle(widget.report.status);
-  final statusColor = getStatusColor(widget.report.status);
-
-  return Directionality(
-    textDirection: TextDirection.rtl,
-    child: Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
-      appBar: AppBar(
-        title: const Text("تفاصيل البلاغ"),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        foregroundColor: Colors.black,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Container(
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF5F5F5),
+        appBar: AppBar(
+          title: const Text("تفاصيل البلاغ"),
+          backgroundColor: Colors.white,
+          elevation: 0,
+          foregroundColor: Colors.black,
+        ),
+        body: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "صورة الطريق",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 16),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: widget.report.image.isEmpty
-                    ? Container(
-                        height: 200,
-                        color: Colors.grey[300],
-                        child: const Icon(Icons.image_not_supported),
-                      )
-                    : Image.network(
-                        widget.report.image,
-                        height: 200,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                      ),
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                "معلومات المشكلة",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 20),
-              _buildInfo("الاسم:", userName),
-              _buildInfo("البريد الإلكتروني:", userEmail),
-              _buildInfo("المحافظة:", widget.report.governorate),
-              _buildInfo("الإحداثيات:", widget.report.coordinates),
-              _buildInfo("اسم الشارع:", widget.report.street),
-              _buildInfo("المدينة:", widget.report.city),
-              _buildInfo("الوصف:", widget.report.details),
-              const SizedBox(height: 16),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "حالة الطريق: ",
-                    style: TextStyle(fontWeight: FontWeight.bold),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "صورة الطريق",
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
                   ),
-                  Expanded(
-                    child: Text(
-                      statusTitle,
-                      style: TextStyle(
-                        color: statusColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                      softWrap: true,
-                      overflow: TextOverflow.visible,
+                ),
+                const SizedBox(height: 16),
+
+                /// صورة البلاغ
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: widget.report.image.isEmpty
+                      ? Container(
+                          height: 200,
+                          color: Colors.grey[300],
+                          child: const Icon(Icons.image_not_supported),
+                        )
+                      : Image.network(
+                          widget.report.image,
+                          height: 200,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        ),
+                ),
+                const SizedBox(height: 24),
+
+                const Text(
+                  "معلومات المشكلة",
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                _buildInfo("الاسم:", userName),
+                _buildInfo("البريد الإلكتروني:", userEmail),
+                _buildInfo("المحافظة:", widget.report.governorate),
+                _buildInfo("الإحداثيات:", widget.report.coordinates),
+                _buildInfo("اسم الشارع:", widget.report.street),
+                _buildInfo("المدينة:", widget.report.city),
+                _buildInfo("الوصف:", widget.report.details),
+
+                const SizedBox(height: 16),
+
+                /// حالة البلاغ
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "حالة الطريق:",
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildActionButton(
-                    icon: Icons.check,
-                    color: Colors.green,
-                    onTap: () => updateStatus("approved"),
-                  ),
-                  const SizedBox(width: 20),
-                  _buildActionButton(
-                    icon: Icons.close,
-                    color: Colors.red,
-                    onTap: () => updateStatus("rejected"),
-                  ),
-                  const SizedBox(width: 20),
-                  _buildActionButton(
-                    icon: Icons.access_time,
-                    color: Colors.orange,
-                    onTap: () => updateStatus("pending"),
-                  ),
-                ],
-              ),
-            ],
+                    Expanded(
+                      child: Text(
+                        statusTitle,
+                        style: TextStyle(
+                          color: statusColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 24),
+
+                /// أزرار التحكم
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildActionButton(
+                      icon: Icons.check,
+                      color: Colors.green,
+                      onTap: () => updateStatus("approved"),
+                    ),
+                    const SizedBox(width: 20),
+                    _buildActionButton(
+                      icon: Icons.close,
+                      color: Colors.red,
+                      onTap: () => updateStatus("rejected"),
+                    ),
+                    const SizedBox(width: 20),
+                    _buildActionButton(
+                      icon: Icons.access_time,
+                      color: Colors.orange,
+                      onTap: () => updateStatus("pending"),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildInfo(String title, String value) {
     return Padding(

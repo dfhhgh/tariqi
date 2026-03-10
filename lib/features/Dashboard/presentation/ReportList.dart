@@ -6,6 +6,7 @@ import 'package:flutter_application_1/features/Dashboard/domain/usecases/get_use
 import 'package:flutter_application_1/features/Dashboard/widgets/ReportCard.dart';
 import 'package:flutter_application_1/features/Report/data/reposrity/report_repository_impl.dart';
 import 'package:flutter_application_1/features/Report/domain/entities/report_entity.dart';
+import 'package:flutter_application_1/features/notifications/presentation/NotificationsScreen.dart';
 
 class ReportsList extends StatelessWidget {
   const ReportsList({super.key});
@@ -47,64 +48,128 @@ class ReportsList extends StatelessWidget {
 
     final userId = FirebaseAuth.instance.currentUser!.uid;
 
-    return StreamBuilder<List<ReportEntity>>(
-      stream: usecase(userId),
-      builder: (context, snapshot) {
-        /// loading
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F5F5),
 
-        /// no data
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(
-            child: Text(
-              "لا يوجد بلاغات",
-              style: TextStyle(fontSize: 18),
-            ),
-          );
-        }
+      /// AppBar
+      appBar: AppBar(
+        title: const Text("بلاغاتي"),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
 
-        final reports = snapshot.data!;
+        /// زر الإشعارات
+        actions: [
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection("notifications")
+                .where("userId", isEqualTo: userId)
+                .where("isRead", isEqualTo: false)
+                .snapshots(),
+            builder: (context, snapshot) {
+              int count = snapshot.data?.docs.length ?? 0;
 
-        return ListView.builder(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 25,
-            vertical: 40,
-          ),
-          itemCount: reports.length,
-          itemBuilder: (context, index) {
-            final report = reports[index];
-
-            /// تحويل الحالة
-            final statusTitle = getStatusTitle(report.status);
-            final statusColor = getStatusColor(report.status);
-
-            return Column(
-              children: [
-                InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ReportDetailsScreen(report: report),
-                      ),
-                    );
-                  },
-                  child: ReportCard(
-                    title: statusTitle,
-                    titleColor: statusColor,
-                    imageUrl: report.image,
+              return Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.notifications),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const NotificationsScreen(),
+                        ),
+                      );
+                    },
                   ),
-                ),
-                const SizedBox(height: 20),
-              ],
+
+                  /// النقطة الحمراء
+                  if (count > 0)
+                    Positioned(
+                      right: 10,
+                      top: 10,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Text(
+                          count.toString(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+
+      /// قائمة البلاغات
+      body: StreamBuilder<List<ReportEntity>>(
+        stream: usecase(userId),
+        builder: (context, snapshot) {
+          /// loading
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
             );
-          },
-        );
-      },
+          }
+
+          /// no data
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(
+              child: Text(
+                "لا يوجد بلاغات",
+                style: TextStyle(fontSize: 18),
+              ),
+            );
+          }
+
+          final reports = snapshot.data!;
+
+          return ListView.builder(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 25,
+              vertical: 40,
+            ),
+            itemCount: reports.length,
+            itemBuilder: (context, index) {
+              final report = reports[index];
+
+              /// تحويل الحالة
+              final statusTitle = getStatusTitle(report.status);
+              final statusColor = getStatusColor(report.status);
+
+              return Column(
+                children: [
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ReportDetailsScreen(report: report),
+                        ),
+                      );
+                    },
+                    child: ReportCard(
+                      title: statusTitle,
+                      titleColor: statusColor,
+                      imageUrl: report.image,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
