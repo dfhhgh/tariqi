@@ -1,16 +1,64 @@
-# tariqi
+# Tariqi 🚧
 
-A new Flutter project.
+An AI-powered road problem detection system designed to support smarter infrastructure monitoring and maintenance.
 
-## Getting Started
+## 📖 Overview
 
-This project is a starting point for a Flutter application.
+Tariqi is a mobile application that helps identify road defects and infrastructure issues using Artificial Intelligence and Computer Vision technologies. The project aims to contribute to smarter city management by enabling efficient road condition monitoring and reporting.
 
-A few resources to get you started if this is your first Flutter project:
+## ✨ Features
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+* Detect road problems using AI models
+* Analyze captured road images
+* User-friendly mobile interface built with Flutter
+* Real-time prediction and visualization
+* Support for infrastructure monitoring and maintenance workflows
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 🛠️ Technologies Used
+
+### Mobile Development
+
+* Flutter
+* Dart
+
+### Artificial Intelligence
+
+* Python
+* YOLOv8
+* Computer Vision
+
+### Development Tools
+
+* Git & GitHub
+* VS Code / Android Studio
+
+## 🧠 AI Model
+
+The project utilizes YOLOv8 for object detection and image analysis. The model is trained to identify road-related issues from images, helping automate the process of road inspection and monitoring.
+
+## 🎯 Project Goals
+
+* Improve road maintenance efficiency
+* Support smart city initiatives
+* Reduce manual inspection efforts
+* Demonstrate practical applications of AI and Computer Vision
+
+## 📱 Screenshots
+
+Add screenshots of the application here.
+
+## 🚀 Future Improvements
+
+* Real-time video detection
+* GPS integration for issue location tracking
+* Cloud-based data storage
+* Dashboard for monitoring reported road issues
+* Advanced analytics and reporting
+
+## 👨‍💻 Team
+
+Developed as a Software Engineering and AI project focused on applying Computer Vision to solve real-world infrastructure challenges.
+
+## 📄 License
+
+This project is intended for educational and research purposes.
